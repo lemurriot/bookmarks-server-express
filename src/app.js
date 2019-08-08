@@ -17,7 +17,9 @@ app.use(morgan(morganOption))
 app.use(helmet())
 app.use(cors())
 
-
+app.get('/', (req, res) => {
+  res.send('Hello Bookmarks')
+})
 app.use(function validateBearerToken(req, res, next){
   logger.error(`Unauthorized request to page: ${req.path}`)
   const apiToken = process.env.API_TOKEN

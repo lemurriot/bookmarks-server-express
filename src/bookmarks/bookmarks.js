@@ -6,9 +6,24 @@ const bookmarksRouter = express.Router()
 const bodyParser = express.json()
 
 bookmarksRouter
-    .route('/')
+    .route('/bookmarks')
     .get((req, res) => {
-      res.send('hello world')
+        res.json(bookmarks)
+    })
+    .post(bodyParser, (req, res) => {
+        
     })
 
-    module.exports = bookmarksRouter
+bookmarksRouter
+    .route('/bookmarks/:id')
+    .get((req, res) => {
+        const { id } = req.params
+        const bookmark = bookmarks.find(bk => bk.id === id)
+        if(!bookmark){
+            logger.error(`Bookmark id ${id} requested and not found`)
+            res.status(404).send('Not Found')
+        }
+        res.json(bookmark)
+    })
+
+module.exports = bookmarksRouter
