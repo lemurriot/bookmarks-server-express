@@ -21,11 +21,11 @@ app.get('/', (req, res) => {
   res.send('Hello Bookmarks')
 })
 app.use(function validateBearerToken(req, res, next){
-  logger.error(`Unauthorized request to page: ${req.path}`)
   const apiToken = process.env.API_TOKEN
   const authToken = req.get('Authorization')
-
+  
   if(!authToken || authToken.split(' ')[1] !== apiToken){
+    logger.error(`Unauthorized request to page: ${req.path}`)
     return res.status(401).json({
       error: 'Unauthorized Request!'
     })
