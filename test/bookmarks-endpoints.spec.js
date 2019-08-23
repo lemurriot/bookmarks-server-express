@@ -37,4 +37,28 @@ describe.only('Bookmarks Endpoints', function() {
           })
         })
     })
+
+    describe('GET /bookmarks/:id', () => {
+      context('Given no bookmarks', () => {
+        it('responds with 404', () => {
+          const bookmarkId = 3
+          return supertest(app)
+            .get(`/bookmarks/${bookmarkId}`)
+            .expect(404)
+        })
+      })
+      context('Given there are bookmarks in the db', () => {
+        const testBookmarks = makeBookmarksArray()
+        beforeEach('insert data into db', () => {
+          return db.into('bookmarks_list').insert(testBookmarks)
+        })
+        it('responds with 200 and specified bookmark', () => {
+            const bookmarkId = 2
+            const expectedBookmark = testBookmarks[bookmarkId - 1]
+            return supertest(app)
+                .get(`/bookmarks/${bookmarkId}`)
+                .expect(200, expectedBookmark)
+        })
+      })
+    })
 })
