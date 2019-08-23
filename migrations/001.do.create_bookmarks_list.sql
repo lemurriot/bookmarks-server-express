@@ -3,5 +3,5 @@ CREATE TABLE bookmarks_list (
     title TEXT NOT NULL,
     url TEXT NOT NULL,
     description TEXT,
-    rating SMALLINT NOT NULL CHECK (price > 0 AND price < 6)
+    rating SMALLINT NOT NULL CHECK (rating > 0 AND rating < 6)
 );
