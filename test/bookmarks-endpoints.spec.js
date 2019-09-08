@@ -43,8 +43,8 @@ describe.only('Bookmarks Endpoints', function() {
         const newBookmark = {
           title: "Test new title",
           url: "https://test123.dev",
-          description: "Test new description...",
-          rating: "4"
+          description: "test new descriptions",
+          rating: 4,
         }
         return supertest(app)
           .post('/bookmarks')
@@ -57,7 +57,7 @@ describe.only('Bookmarks Endpoints', function() {
             expect(url).to.eql(newBookmark.url)
             expect(rating).to.eql(newBookmark.rating)
             expect(res.body).to.have.property('id')
-            expect(res.headers.location).to.eql(`/bookmarks/${id}`)
+            expect(res.headers.location).to.eql(`/bookmarks/${res.body.id}`)
           })
           .then(postRes => 
               supertest(app)

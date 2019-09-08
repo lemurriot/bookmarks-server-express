@@ -52,11 +52,10 @@ bookmarksRouter
             res.status(400).send('Invalid request')
         }
         const newBookmark = {
-            id: uuid(),
             title: req.body.title,
             url: req.body.url,
             description: req.body.description,
-            rating: req.body.description
+            rating: req.body.rating
         }
 
         BookmarksService.insertBookmark(
