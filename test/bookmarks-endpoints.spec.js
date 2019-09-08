@@ -77,6 +77,18 @@ describe.only('Bookmarks Endpoints', function() {
               .expect(400, 'Invalid data')
           })
       })
+
+      const invalidEntries = [0, 6, -1000, 1000, 'hello', {hi: "there"}, []]
+      invalidEntries.forEach(entry => {
+        it(`returns 400 with an error message if the req.body.rating is not an integer in the range of 1 and 5`, () => {
+            const testBookmark = {...newBookmark, rating: entry}
+
+            return supertest(app)
+              .post('/bookmarks')
+              .send(testBookmark)
+              .expect(400, 'Invalid data')
+          })
+      })
     })
 
     describe('GET /bookmarks/:id', () => {
