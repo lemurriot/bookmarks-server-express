@@ -39,13 +39,13 @@ describe.only('Bookmarks Endpoints', function() {
     })
 
     describe('POST /bookmarks', () => {
+      const newBookmark = {
+        title: "Test new title",
+        url: "https://test123.dev",
+        description: "test new descriptions",
+        rating: 4,
+      }
       it('creates a bookmark, responds with 201 and the new bookmark', function() {
-        const newBookmark = {
-          title: "Test new title",
-          url: "https://test123.dev",
-          description: "test new descriptions",
-          rating: 4,
-        }
         return supertest(app)
           .post('/bookmarks')
           .send(newBookmark)
@@ -64,6 +64,18 @@ describe.only('Bookmarks Endpoints', function() {
                 .get(`/bookmarks/${postRes.body.id}`)
                 .expect(postRes.body)
             )
+      })
+      const requiredFields = ['title', 'url', 'rating']
+      requiredFields.forEach(field => {
+        it(`returns 400 with an error message if post request does not include ${field}`, () => {
+            const testBookmark = {...newBookmark}
+            delete testBookmark[field]
+
+            return supertest(app)
+              .post('/bookmarks')
+              .send(testBookmark)
+              .expect(400, 'Invalid data')
+          })
       })
     })
 

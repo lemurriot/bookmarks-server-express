@@ -33,23 +33,23 @@ bookmarksRouter
 
         if(!title || title.trim() === ''){
             logger.error(`Title is required`)
-            res.status(400).send('Invalid data')
+            return res.status(400).send('Invalid data')
         }
         if(!url){
             logger.error(`URL is required`)
-            res.status(400).send('Invalid data')
+            return res.status(400).send('Invalid data')
         }
         if(!rating){
             logger.error(`Rating is required`)
-            res.status(400).send('Invalid data')
+            return res.status(400).send('Invalid data')
         }
         if(!validateURL(url)){
             logger.error(`URL param received invalid format: ${url}`)
-            res.status(400).send('Invalid request')
+            return res.status(400).send('Invalid data')
         }
         if(Number.isNaN(ratingVal) || ratingVal > 5 || ratingVal < 1){
             logger.error(`Received invalid rating param of ${ratingVal}`)
-            res.status(400).send('Invalid request')
+            return res.status(400).send('Invalid data')
         }
         const newBookmark = {
             title: req.body.title,
