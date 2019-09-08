@@ -9,13 +9,13 @@ const xss = require('xss')
 const bookmarksRouter = express.Router()
 const bodyParser = express.json()
 
-// const serializeBookmark = bookmark => ({
-//     id: bookmark.id,
-//     title: xss(bookmark.title),
-//     url: xss(bookmark.url),
-//     description: xss(bookmark.description),
-//     rating: bookmark.rating
-// })
+const serializeBookmark = bookmark => ({
+    id: bookmark.id,
+    title: xss(bookmark.title),
+    url: xss(bookmark.url),
+    description: xss(bookmark.description),
+    rating: bookmark.rating
+})
 
 bookmarksRouter
     .route('/bookmarks')
@@ -66,7 +66,7 @@ bookmarksRouter
             res
                 .status(201)
                 .location(`/bookmarks/${bookmark.id}`)
-                .json(bookmark)
+                .json(serializeBookmark(bookmark))
         })
         .catch(next)
     })
@@ -82,7 +82,7 @@ bookmarksRouter
                     logger.error(`Bookmark id ${id} requested and not found`)
                     res.status(404).send('Not Found')
                 }
-                res.json(bookmark)
+                res.json(serializeBookmark(bookmark))
             })
             .catch(next)
         // const bookmark = bookmarks.find(bk => bk.id === id)

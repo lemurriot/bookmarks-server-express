@@ -15,6 +15,8 @@ describe.only('Bookmarks Endpoints', function() {
     before('clean the table', () => db('bookmarks_list').truncate())
     afterEach('cleanup', () => db('bookmarks_list').truncate())
 
+    
+
     describe('GET /bookmarks', () => {
         context('Given no bookmarks in the db', () => {
             it('responds with 200 and an empty list', () => {
@@ -37,6 +39,9 @@ describe.only('Bookmarks Endpoints', function() {
           })
         })
     })
+
+
+
 
     describe('POST /bookmarks', () => {
       const newBookmark = {
@@ -101,6 +106,10 @@ describe.only('Bookmarks Endpoints', function() {
       })
     })
 
+
+
+
+
     describe('GET /bookmarks/:id', () => {
       context('Given no bookmarks', () => {
         it('responds with 404', () => {
@@ -123,5 +132,28 @@ describe.only('Bookmarks Endpoints', function() {
                 .expect(200, expectedBookmark)
         })
       })
+      context('Given an XSS attack bookmark', () => {
+        const maliciousBookmark = {
+            id: 911,
+            title: 'Naughty naughty very naughty <script>alert("xss");</script>',
+            description: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
+            url: 'https://www.google.com',
+            rating: 5
+        }
+        beforeEach('insert malicious bookmark', () => {
+            return db
+                .into('bookmarks_list')
+                .insert([ maliciousBookmark ])
+        })
+        it('removes XSS attack content', () => {
+            return supertest(app)
+                .get(`/bookmarks/${maliciousBookmark.id}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.title).to.eql('Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;')
+                    expect(res.body.description).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`)
+                })
+        })
+    })
     })
 })
