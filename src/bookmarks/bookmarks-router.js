@@ -28,7 +28,7 @@ bookmarksRouter
             .catch(next)
     })
     .post(bodyParser, (req, res, next) => {
-        const { title, url, description = '', rating } = req.body
+        const { title, url, rating } = req.body
         const ratingVal = parseInt(rating)
 
         if(!title || title.trim() === ''){
@@ -54,7 +54,7 @@ bookmarksRouter
         const newBookmark = {
             title: req.body.title,
             url: req.body.url,
-            description: req.body.description,
+            description: req.body.description || '',
             rating: req.body.rating
         }
 
