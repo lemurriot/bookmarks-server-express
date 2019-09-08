@@ -71,37 +71,37 @@ bookmarksRouter
         .catch(next)
     })
 
-bookmarksRouter
-    .route('/bookmarks/:id')
-    .get((req, res, next) => {
-        const knexInstance = req.app.get('db')
-        const { id } = req.params
-        BookmarksService.getById(knexInstance, id)
+    bookmarksRouter
+        .route('/bookmarks/:bookmark_id')
+        .all((req, res, next) => {
+            const { bookmark_id } = req.params
+            BookmarksService.getById(req.app.get('db'), bookmark_id)
             .then(bookmark => {
-                if(!bookmark){
-                    logger.error(`Bookmark id ${id} requested and not found`)
-                    res.status(404).send('Not Found')
+                if (!bookmark) {
+                logger.error(`Bookmark with id ${bookmark_id} not found.`)
+                return res.status(404).json({
+                    error: { message: `Bookmark Not Found` }
+                })
                 }
-                res.json(serializeBookmark(bookmark))
+                res.bookmark = bookmark
+                next()
             })
             .catch(next)
-        // const bookmark = bookmarks.find(bk => bk.id === id)
-    })
-    .delete((req, res) => {
-        const { id } = req.params
-
-        const bookmarksIndex = bookmarks.findIndex(item => item.id === id)
-
-        if (bookmarksIndex === -1){
-            logger.error(`Invalid id of ${id} supplied, id not found`)
-            return res.status(404).send('Not Found')
-        }
-
-        bookmarks.splice(bookmarksIndex, 1)
-
-        logger.info(`Bookmark with id ${id} deleted`)
-
-        res.status(204).end()
-    })
+        })
+        .get((req, res) => {
+            res.json(serializeBookmark(res.bookmark))
+        })
+        .delete((req, res, next) => {
+            const { bookmark_id } = req.params
+            BookmarksService.deleteBookmark(
+            req.app.get('db'),
+            bookmark_id
+            )
+            .then(numRowsAffected => {
+                logger.info(`Bookmark with id ${bookmark_id} deleted.`)
+                res.status(204).end()
+            })
+            .catch(next)
+  })
 
 module.exports = bookmarksRouter

@@ -110,13 +110,13 @@ describe.only('Bookmarks Endpoints', function() {
 
 
 
-    describe('GET /bookmarks/:id', () => {
+    describe('GET /bookmarks/:bookmark_id', () => {
       context('Given no bookmarks', () => {
         it('responds with 404', () => {
-          const bookmarkId = 3
+          const bookmarkId = 307
           return supertest(app)
             .get(`/bookmarks/${bookmarkId}`)
-            .expect(404)
+            .expect(404, {error: { message: "Bookmark Not Found"}})
         })
       })
       context('Given there are bookmarks in the db', () => {
@@ -153,7 +153,40 @@ describe.only('Bookmarks Endpoints', function() {
                     expect(res.body.title).to.eql('Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;')
                     expect(res.body.description).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`)
                 })
+          })
+      })
+    })
+
+    describe(`DELETE /bookmarks/:bookmark_id`, () => {
+      context('Given no bookmarks in database', () => {
+        it(`responds with a 404`, () => {
+          const bookmarkId = 54321
+          return supertest(app)
+            .delete(`/bookmarks/${bookmarkId}`) 
+            .expect(404, { error: { message: 'Bookmark Not Found' } })
+          })
         })
-    })
-    })
+      })
+      context('Given there are bookmarks in the database', () => {
+        const testBookmarks = makeBookmarksArray()
+        beforeEach('insert bookmarks', () => {
+          return db
+            .into('bookmarks_list')
+            .insert(testBookmarks)
+        })
+
+        it('responds with 204 and removes the article', () => {
+          const idToRemove = 2
+          const expectedBookmarkList = testBookmarks.filter(bookmark => bookmark.id !== idToRemove)
+
+          return supertest(app)
+            .delete(`/bookmarks/${idToRemove}`)
+            .expect(204)
+            .then(res => 
+                supertest(app)
+                  .get('/bookmarks')
+                  .expect(expectedBookmarkList)
+              )
+        })
+      })
 })
