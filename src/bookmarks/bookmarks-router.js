@@ -1,11 +1,21 @@
 const express = require('express')
 const logger = require('../logger')
-const bookmarks = require('../store')
+// const bookmarks = require('../store')
 const uuid = require('uuid/v4')
 const validateURL = require('../validateURL')
+const BookmarksService = require('./bookmarks-service')
+const xss = require('xss')
+
 const bookmarksRouter = express.Router()
 const bodyParser = express.json()
-const BookmarksService = require('../../bookmarks-service')
+
+// const serializeBookmark = bookmark => ({
+//     id: bookmark.id,
+//     title: xss(bookmark.title),
+//     url: xss(bookmark.url),
+//     description: xss(bookmark.description),
+//     rating: bookmark.rating
+// })
 
 bookmarksRouter
     .route('/bookmarks')
@@ -17,7 +27,7 @@ bookmarksRouter
             })
             .catch(next)
     })
-    .post(bodyParser, (req, res) => {
+    .post(bodyParser, (req, res, next) => {
         const { title, url, description = '', rating } = req.body
         const ratingVal = parseInt(rating)
 
@@ -43,13 +53,23 @@ bookmarksRouter
         }
         const newBookmark = {
             id: uuid(),
-            title,
-            description,
-            rating
+            title: req.body.title,
+            url: req.body.url,
+            description: req.body.description,
+            rating: req.body.description
         }
 
-        bookmarks.push(newBookmark)
-        res.json(newBookmark)
+        BookmarksService.insertBookmark(
+            req.app.get('db'),
+            newBookmark
+        )
+        .then(bookmark => {
+            res
+                .status(201)
+                .location(`/bookmarks/${bookmark.id}`)
+                .json(bookmark)
+        })
+        .catch(next)
     })
 
 bookmarksRouter

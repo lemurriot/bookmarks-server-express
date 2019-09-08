@@ -38,6 +38,35 @@ describe.only('Bookmarks Endpoints', function() {
         })
     })
 
+    describe('POST /bookmarks', () => {
+      it('creates a bookmark, responds with 201 and the new bookmark', function() {
+        const newBookmark = {
+          title: "Test new title",
+          url: "https://test123.dev",
+          description: "Test new description...",
+          rating: "4"
+        }
+        return supertest(app)
+          .post('/bookmarks')
+          .send(newBookmark)
+          .expect(201)
+          .expect(res => {
+            const { title, description, url, rating } = res.body
+            expect(title).to.eql(newBookmark.title)
+            expect(description).to.eql(newBookmark.description)
+            expect(url).to.eql(newBookmark.url)
+            expect(rating).to.eql(newBookmark.rating)
+            expect(res.body).to.have.property('id')
+            expect(res.headers.location).to.eql(`/bookmarks/${id}`)
+          })
+          .then(postRes => 
+              supertest(app)
+                .get(`/bookmarks/${postRes.body.id}`)
+                .expect(postRes.body)
+            )
+      })
+    })
+
     describe('GET /bookmarks/:id', () => {
       context('Given no bookmarks', () => {
         it('responds with 404', () => {

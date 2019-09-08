@@ -3,7 +3,7 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const helmet = require('helmet')
-const bookmarkRouter = require('./bookmarks/bookmarks')
+const bookmarksRouter = require('./bookmarks/bookmarks-router')
 const logger = require('./logger')
 const { NODE_ENV } = require('./config')
 
@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
 //   next()
 // })
 
-app.use(bookmarkRouter)
+app.use(bookmarksRouter)
 
 app.use(function errorHandler(error, req, res, next){
   let response
