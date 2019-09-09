@@ -1,0 +1,10 @@
+GET /getAllUsers  //not restful b/c it uses camel case and verb in name
+GET /getArticleById?id=123  //not restful b/c it uses camelCase, verb, and ?id= query string instead of slask (/)
+GET /getArticleById/123  //not restful b/c camelCase, verb
+GET /create/ShoppingItem  //not restful b/c verb & create should be a POST request, plus uses PascalCase
+DELETE /remove/user/abc  //not restful b/c verb
+GET /article/get-all-comments //not restful b/c verb
+POST /users/123  //not restful b/c POST /users would suffice, the /123 path would imply the resource id to be called in a future GET request
+POST /createNote //not restful b/c create verb, camelCase
+DELETE /notes   //not restful b/c you would delete a specific resource in the notes path, not the entire /notes set
+PATCH /article //not restful b/c you would patch a specific resource in the /article path, /article implies the parent of that resource
