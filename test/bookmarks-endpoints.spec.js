@@ -2,7 +2,7 @@ const knex = require('knex')
 const app = require('../src/app')
 const { makeBookmarksArray } = require('./bookmarks.fixtures.js')
 
-describe.only('Bookmarks Endpoints', function() {
+describe('Bookmarks Endpoints', function() {
     let db
     before('make knex instance', () => {
         db = knex({
@@ -82,7 +82,6 @@ describe.only('Bookmarks Endpoints', function() {
               .expect(400, 'Invalid data')
           })
       })
-
       const invalidRatingsEntries = [0, 6, -1000, 1000, 'hello', {hi: "there"}, []]
       invalidRatingsEntries.forEach(entry => {
         it(`returns 400 with an error message if the req.body.rating is not an integer in the range of 1 and 5`, () => {
@@ -105,7 +104,6 @@ describe.only('Bookmarks Endpoints', function() {
         })
       })
     })
-
 
 
 
@@ -157,6 +155,9 @@ describe.only('Bookmarks Endpoints', function() {
       })
     })
 
+
+
+
     describe(`DELETE /api/bookmarks/:bookmark_id`, () => {
       context('Given no bookmarks in database', () => {
         it(`responds with a 404`, () => {
@@ -166,27 +167,71 @@ describe.only('Bookmarks Endpoints', function() {
             .expect(404, { error: { message: 'Bookmark Not Found' } })
           })
         })
+        context('Given there are bookmarks in the database', () => {
+          const testBookmarks = makeBookmarksArray()
+          beforeEach('insert bookmarks', () => {
+            return db
+              .into('bookmarks_list')
+              .insert(testBookmarks)
+          })
+  
+          it('responds with 204 and removes the article', () => {
+            const idToRemove = 2
+            const expectedBookmarkList = testBookmarks.filter(bookmark => bookmark.id !== idToRemove)
+  
+            return supertest(app)
+              .delete(`/api/bookmarks/${idToRemove}`)
+              .expect(204)
+              .then(res => 
+                  supertest(app)
+                    .get('/api/bookmarks')
+                    .expect(expectedBookmarkList)
+                )
+          })
+        })
       })
-      context('Given there are bookmarks in the database', () => {
-        const testBookmarks = makeBookmarksArray()
-        beforeEach('insert bookmarks', () => {
-          return db
-            .into('bookmarks_list')
-            .insert(testBookmarks)
+
+
+
+      describe.only(`PATCH /api/bookmarks/:bookmark_id`, () => {
+        context(`Given no bookmarks in the db`, () => {
+          it(`responds with 404`, () => {
+            const idToUpdate = 12345
+            return supertest(app)
+              .patch(`/api/bookmarks/${idToUpdate}`)
+              .expect(404, { error: { message: 'Bookmark Not Found' } })
+          })
         })
 
-        it('responds with 204 and removes the article', () => {
-          const idToRemove = 2
-          const expectedBookmarkList = testBookmarks.filter(bookmark => bookmark.id !== idToRemove)
-
-          return supertest(app)
-            .delete(`/api/bookmarks/${idToRemove}`)
-            .expect(204)
-            .then(res => 
-                supertest(app)
-                  .get('/api/bookmarks')
-                  .expect(expectedBookmarkList)
-              )
+        context(`Given there are articles in the db`, () => {
+          const testBookmarks = makeBookmarksArray()
+          beforeEach(`insert bookmarks`, () => {
+            return db
+              .into('bookmarks_list')
+              .insert(testBookmarks) 
+          })
+          it(`responds with 204 and updates the bookmark`, () => {
+            const idToUpdate = 2
+            const updateBookmark = {
+              title: 'updated title',
+              description: 'updated description...',
+              url: 'https://www.pdxwebdev.io',
+              rating: 2
+            }
+            const expectedBookmark = {
+              ...testBookmarks[idToUpdate - 1],
+              ...updateBookmark
+            }
+            return supertest(app)
+              .patch(`/api/bookmarks/${idToUpdate}`)
+              .send(updateBookmark)
+              .expect(204)
+              .then(res => 
+                  supertest(app)
+                    .get(`/api/bookmarks/${idToUpdate}`)
+                      .expect(expectedBookmark)
+                )
+          })
         })
       })
 })
